@@ -3,6 +3,9 @@ import ProductTable from "./components/ProductTable";
 import ProductForm from "./components/ProductForm";
 import { Product } from "./types";
 
+// Icons
+import { Plus, Trash } from "./assets/Icons";
+
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -38,9 +41,14 @@ const App: React.FC = () => {
   };
 
   const deleteProduct = (id: number) => {
-    const updatedProducts = products.filter((p) => p.id !== id);
-    setProducts(updatedProducts);
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
+    const deleteItem = confirm("Are you sure you want to delete?");
+    if (deleteItem) {
+      const updatedProducts = products.filter((p) => p.id !== id);
+      setProducts(updatedProducts);
+      localStorage.setItem("products", JSON.stringify(updatedProducts));
+    } else {
+      alert("Canceled");
+    }
   };
 
   const bulkDelete = () => {
@@ -105,50 +113,50 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Product Management App</h1>
-      <div className="flex gap-4 mb-4">
-        <button
-          onClick={() => {
-            setEditingProduct(null);
-            setIsFormOpen(true);
-          }}
-          className="bg-green-500 text-white px-4 py-2"
-        >
-          Add Product
-        </button>
-        {selectedProducts.length > 0 && (
-          <button
-            onClick={bulkDelete}
-            className="bg-red-500 text-white px-4 py-2"
+    <div className="p-6 w-[90%] md:w-4/5 m-auto">
+      <div className="flex justify-between mb-4 outline-none">
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl">Product Table</h1>
+          <select
+            id="pageSize"
+            value={productsPerPage}
+            onChange={handlePageSizeChange}
+            className="border px-2 py-1"
           >
-            Delete Selected
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+          </select>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border px-2 py-1 flex-grow"
+          />
+          <button
+            onClick={() => {
+              setEditingProduct(null);
+              setIsFormOpen(true);
+            }}
+            className="border text-white px-3 md:py-1"
+          >
+            <Plus />
           </button>
-        )}
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border px-2 py-1 flex-grow"
-        />
+          {selectedProducts.length > 0 && (
+            <button
+              onClick={bulkDelete}
+              className="border text-white px-3 py-1"
+            >
+              <Trash />
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="pageSize" className="mr-2">
-          Products per page:
-        </label>
-        <select
-          id="pageSize"
-          value={productsPerPage}
-          onChange={handlePageSizeChange}
-          className="border px-2 py-1"
-        >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-        </select>
-      </div>
+      <div></div>
 
       <ProductTable
         products={currentProducts}
@@ -170,7 +178,7 @@ const App: React.FC = () => {
             <button
               key={i + 1}
               onClick={() => paginate(i + 1)}
-              className={`px-3 py-1 border ${
+              className={`px-3 py-1 border rounded-sm ${
                 currentPage === i + 1 ? "bg-blue-500 text-white" : ""
               }`}
             >
