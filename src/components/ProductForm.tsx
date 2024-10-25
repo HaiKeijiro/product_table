@@ -1,5 +1,5 @@
 // src/components/ProductForm.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Product, ProductFormProps } from "../types";
 import { createPortal } from "react-dom";
 
@@ -30,9 +30,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return modalRoot
     ? createPortal(
-        <div
-          className="p-4 mx-auto mt-20 bg-white shadow-md max-w-md"
-        >
+        <div className="p-4 mx-auto mt-20 bg-black/10 shadow-md max-w-md">
           <h2 className="text-lg font-bold mb-4">
             {product ? "Edit Product" : "Add Product"}
           </h2>
@@ -63,7 +61,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               className="w-full mb-4 p-2 border"
             />
             <button type="submit" className="bg-blue-500 text-white px-4 py-2">
-              Save
+              {product ? "Edit" : "Add"}
             </button>
             <button
               type="button"

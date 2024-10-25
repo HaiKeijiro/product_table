@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useState, useEffect } from "react";
 import ProductTable from "./components/ProductTable";
 import ProductForm from "./components/ProductForm";
@@ -11,7 +10,7 @@ const App: React.FC = () => {
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage, setProductsPerPage] = useState(5); // Default value
+  const [productsPerPage, setProductsPerPage] = useState(5);
 
   // Sorting State
   const [sortConfig, setSortConfig] = useState<{
@@ -22,18 +21,18 @@ const App: React.FC = () => {
   // Selected Products for Bulk Delete
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
 
+  // Search Query State
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     const storedProducts = localStorage.getItem("products");
-    if (storedProducts) {
-      setProducts(JSON.parse(storedProducts));
-    }
+    if (storedProducts) setProducts(JSON.parse(storedProducts));
   }, []);
 
   const saveProduct = (product: Product) => {
     const updatedProducts = editingProduct
       ? products.map((p) => (p.id === product.id ? product : p))
       : [...products, product];
-
     setProducts(updatedProducts);
     localStorage.setItem("products", JSON.stringify(updatedProducts));
   };
@@ -82,10 +81,18 @@ const App: React.FC = () => {
     setProducts(sortedProducts);
   };
 
-  // Pagination Logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
+
+  // Apply Search Filter
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.price.toString().includes(searchQuery)
+  );
+
+  const currentProducts = filteredProducts.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
@@ -100,23 +107,32 @@ const App: React.FC = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Product Management App</h1>
-      <button
-        onClick={() => {
-          setEditingProduct(null);
-          setIsFormOpen(true);
-        }}
-        className="bg-green-500 text-white px-4 py-2 mb-4"
-      >
-        Add Product
-      </button>
-      {selectedProducts.length > 0 && (
+      <div className="flex gap-4 mb-4">
         <button
-          onClick={bulkDelete}
-          className="bg-red-500 text-white px-4 py-2 mb-4 ml-4"
+          onClick={() => {
+            setEditingProduct(null);
+            setIsFormOpen(true);
+          }}
+          className="bg-green-500 text-white px-4 py-2"
         >
-          Delete Selected
+          Add Product
         </button>
-      )}
+        {selectedProducts.length > 0 && (
+          <button
+            onClick={bulkDelete}
+            className="bg-red-500 text-white px-4 py-2"
+          >
+            Delete Selected
+          </button>
+        )}
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border px-2 py-1 flex-grow"
+        />
+      </div>
 
       <div className="mb-4">
         <label htmlFor="pageSize" className="mr-2">
@@ -149,7 +165,7 @@ const App: React.FC = () => {
 
       <div className="mt-4">
         {Array.from(
-          { length: Math.ceil(products.length / productsPerPage) },
+          { length: Math.ceil(filteredProducts.length / productsPerPage) },
           (_, i) => (
             <button
               key={i + 1}
